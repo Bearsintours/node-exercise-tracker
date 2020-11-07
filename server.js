@@ -28,6 +28,28 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
+// retrieve all users
+app.get("/api/exercise/users", async (req, res) => {
+  try {
+    const users = await userModel.find({});
+    res.send(users);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+// create new user
+app.post("/api/exercise/new-user", async (req, res) => {
+  const user = new userModel(req.body);
+  try {
+    await user.save();
+    console.log(user);
+    res.json({ username: user.username, _id: user._id });
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
 // Not found middleware
 app.use((req, res, next) => {
   return next({ status: 404, message: "not found" });
@@ -49,17 +71,6 @@ app.use((err, req, res, next) => {
     errMessage = err.message || "Internal Server Error";
   }
   res.status(errCode).type("txt").send(errMessage);
-});
-
-app.post("/api/exercise/new-user", async (req, res) => {
-  const user = new userModel(req.body);
-  try {
-    await user.save();
-    console.log(user);
-    res.json({ username: user.username, _id: user._id });
-  } catch (e) {
-    res.status(500).send(e);
-  }
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
