@@ -50,6 +50,33 @@ app.post("/api/exercise/new-user", async (req, res) => {
   }
 });
 
+// Add exercise to user
+app.post("/api/exercise/add", async (req, res) => {
+  const data = req.body;
+  const new_exercise = {
+    description: data.description,
+    duration: data.duration,
+    date: data.date ? new Date(data.date) : new Date(),
+  };
+  try {
+    const updatedUser = await userModel.findByIdAndUpdate(
+      data.userId,
+      { $push: { exercise: new_exercise } },
+      { new: true }
+    );
+    const response = {
+      username: updatedUser["username"],
+      description: updatedUser["exercise"][0]["description"],
+      duration: updatedUser["exercise"][0]["duration"],
+      _id: updatedUser["_id"],
+      date: updatedUser["exercise"][0]["date"].toDateString(),
+    };
+    res.json(response);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
 // Not found middleware
 app.use((req, res, next) => {
   return next({ status: 404, message: "not found" });
