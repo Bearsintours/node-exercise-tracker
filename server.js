@@ -50,7 +50,7 @@ app.post("/api/exercise/new-user", async (req, res) => {
   }
 });
 
-// Add exercise to user
+// add exercise to user
 app.post("/api/exercise/add", async (req, res) => {
   const data = req.body;
   const new_exercise = {
@@ -76,6 +76,31 @@ app.post("/api/exercise/add", async (req, res) => {
     res.status(500).send(e);
   }
 });
+
+// log a user's exercises
+app.get("/api/exercise/log", async (req, res) => {
+  const userId = req.query.userId;
+  const startDate = req.query.from ? new Date(req.query.from) : undefined;
+  const endDate = req.query.to ? new Date(req.query.to) : undefined;
+  const limit = req.query.limit;
+  try {
+    const user = await userModel.findById(userId);
+    const exercises = user['exercise'].filter(exercise => {
+      const date = exercise['date'];
+      return startDate ? date > startDate : endDate ? date < endDate : true;
+    })
+    const log = limit ? exercises.slice(0, limit) : exercises;
+    const response = {
+      _id: userId,
+      log: log,
+      count: log.length,
+    }
+    res.send(response);
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  }
+})
 
 // Not found middleware
 app.use((req, res, next) => {
