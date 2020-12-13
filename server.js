@@ -85,22 +85,21 @@ app.get("/api/exercise/log", async (req, res) => {
   const limit = req.query.limit;
   try {
     const user = await userModel.findById(userId);
-    const exercises = user['exercise'].filter(exercise => {
-      const date = exercise['date'];
+    const exercises = user["exercise"].filter((exercise) => {
+      const date = exercise["date"];
       return startDate ? date > startDate : endDate ? date < endDate : true;
-    })
+    });
     const log = limit ? exercises.slice(0, limit) : exercises;
     const response = {
       _id: userId,
       log: log,
       count: log.length,
-    }
+    };
     res.send(response);
   } catch (e) {
-    console.log(e);
     res.status(500).send(e);
   }
-})
+});
 
 // Not found middleware
 app.use((req, res, next) => {
